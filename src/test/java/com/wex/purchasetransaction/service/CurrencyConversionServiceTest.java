@@ -18,11 +18,11 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
+
 @ExtendWith(MockitoExtension.class)
 class CurrencyConversionServiceTest {
 
@@ -44,10 +44,10 @@ class CurrencyConversionServiceTest {
         ExchangeRateEntry entry = new ExchangeRateEntry("Australia", LocalDate.now(), BigDecimal.valueOf(2));
         ExchangeRateResponse exchangeRateResponse = new ExchangeRateResponse(new ExchangeRateEntry[] {entry});
 
-        when(restTemplate.getForObject(anyString(), eq(ExchangeRateResponse.class))).thenReturn(exchangeRateResponse);
+        when(restTemplate.getForObject(any(), eq(ExchangeRateResponse.class))).thenReturn(exchangeRateResponse);
         PurchaseTransaction result = service.convertFromUSD(transaction, "Australia");
 
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(ExchangeRateResponse.class));
+        verify(restTemplate, times(1)).getForObject(any(), eq(ExchangeRateResponse.class));
         assertEquals(new BigDecimal("24.68"), result.getConvertedAmount());
         assertEquals(new BigDecimal("2"), result.getExchangeRate());
 
@@ -60,7 +60,7 @@ class CurrencyConversionServiceTest {
                 .transactionDate(LocalDate.now()).amount(new BigDecimal("12.34")).build();
         ExchangeRateResponse exchangeRateResponse = new ExchangeRateResponse(new ExchangeRateEntry[] {});
 
-        when(restTemplate.getForObject(anyString(), eq(ExchangeRateResponse.class))).thenReturn(exchangeRateResponse);
+        when(restTemplate.getForObject(any(), eq(ExchangeRateResponse.class))).thenReturn(exchangeRateResponse);
 
         assertThrows(ExchangeRateNotFoundException.class, () -> service.convertFromUSD(transaction, "Australia"));
     }
