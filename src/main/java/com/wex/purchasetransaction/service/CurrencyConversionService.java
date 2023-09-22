@@ -1,9 +1,7 @@
 package com.wex.purchasetransaction.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.wex.purchasetransaction.exception.ConversionRateNotFoundException;
+import com.wex.purchasetransaction.exception.ExchangeRateNotFoundException;
 import com.wex.purchasetransaction.model.ExchangeRateResponse;
 import com.wex.purchasetransaction.model.PurchaseTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,7 @@ public class CurrencyConversionService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public PurchaseTransaction convertFromUSD(PurchaseTransaction transaction, String targetCountry) throws RestClientException, JsonProcessingException, ConversionRateNotFoundException {
+    public PurchaseTransaction convertFromUSD(PurchaseTransaction transaction, String targetCountry) throws RestClientException, JsonProcessingException, ExchangeRateNotFoundException {
         LocalDate sixMonthsAgo = transaction.getTransactionDate().minus(Period.ofMonths(6));
 
         //can better build this string, but for simplicity and readability, I will keep it this way
@@ -48,7 +46,7 @@ public class CurrencyConversionService {
             return transaction;
         } else {
             // Handle the case where no exchange rate is available
-            throw new ConversionRateNotFoundException("Conversion rate not found for the specified country and transaction date.");
+            throw new ExchangeRateNotFoundException("Conversion rate not found for the specified country and transaction date.");
         }
     }
 }

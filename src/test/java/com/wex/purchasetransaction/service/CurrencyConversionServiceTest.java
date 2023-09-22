@@ -1,6 +1,6 @@
 package com.wex.purchasetransaction.service;
 
-import com.wex.purchasetransaction.exception.ConversionRateNotFoundException;
+import com.wex.purchasetransaction.exception.ExchangeRateNotFoundException;
 import com.wex.purchasetransaction.model.ExchangeRateEntry;
 import com.wex.purchasetransaction.model.ExchangeRateResponse;
 import com.wex.purchasetransaction.model.PurchaseTransaction;
@@ -53,6 +53,7 @@ class CurrencyConversionServiceTest {
 
     }
 
+
     @Test
     public void testConvertFromUSD_throwExceptionWhenNoExchangeRateFound() throws Exception {
         PurchaseTransaction transaction = PurchaseTransaction.builder().id(1111L).description("test")
@@ -61,6 +62,6 @@ class CurrencyConversionServiceTest {
 
         when(restTemplate.getForObject(anyString(), eq(ExchangeRateResponse.class))).thenReturn(exchangeRateResponse);
 
-        assertThrows(ConversionRateNotFoundException.class, () -> service.convertFromUSD(transaction, "Australia"));
+        assertThrows(ExchangeRateNotFoundException.class, () -> service.convertFromUSD(transaction, "Australia"));
     }
 }

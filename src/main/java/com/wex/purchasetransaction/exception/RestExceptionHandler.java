@@ -6,6 +6,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,18 +16,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
+        return buildErrorResponseEntity(ex, HttpStatus.BAD_REQUEST, "Invalid input format. Please check if the date and number formats are correct.");
+    }
 
-    @ExceptionHandler(ConversionRateNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(ConversionRateNotFoundException ex) {
+    @ExceptionHandler(ExchangeRateNotFoundException.class)
+    protected ResponseEntity<Object> handleEntityNotFound(ExchangeRateNotFoundException ex) {
         return buildErrorResponseEntity(ex, HttpStatus.NOT_FOUND);
     }
 
@@ -36,7 +40,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponseEntity(ex, HttpStatus.INTERNAL_SERVER_ERROR); //TODO: rethink status code
     }
 
-    //Input validation errors
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleEntityNotFound(ConstraintViolationException ex) {
         return buildErrorResponseEntity(ex, HttpStatus.BAD_REQUEST);
@@ -49,14 +52,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String message = "Validation errors found: " + errors;
         return buildErrorResponseEntity(ex, HttpStatus.BAD_REQUEST, message);
     }
-
-
-    private Map<String, List<String>> getErrorsMap(List<String> errors) {
-        Map<String, List<String>> errorResponse = new HashMap<>();
-        errorResponse.put("errors", errors);
-        return errorResponse;
-    }
-
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> catchAll(Exception ex) {

@@ -59,10 +59,12 @@ class PurchaseTransactionServiceTest {
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(transaction));
 
-        PurchaseTransaction result = service.getPurchaseTransactionById(1L);
+        Optional<PurchaseTransaction> result = service.getPurchaseTransactionById(1L);
 
-        assertEquals("test", result.getDescription());
-        assertEquals(new BigDecimal("12.34"), result.getAmount());
+        assertTrue(result.isPresent());
+        assertEquals("test", result.get().getDescription());
+        assertEquals(new BigDecimal("12.34"), result.get().getAmount());
         verify(repository, times(1)).findById(1L);
     }
+
 }

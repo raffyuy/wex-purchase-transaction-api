@@ -12,14 +12,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,21 +35,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 class PurchaseTransactionControllerTest {
 
+    public static final String CREATE_PURCHASE_TRANSACTION_URI = "/api/v1/purchasetransaction";
+    public static final String ERROR_MESSAGE_JSON_PATH = "$.error.message";
     private MockMvc mockMvc;
 
     @InjectMocks
     private PurchaseTransactionController controller;
 
-    @Mock
+    @MockBean
     private PurchaseTransactionService purchaseTransactionService;
 
-    @Mock
+    @MockBean
     private CurrencyConversionService currencyConversionService;
+
+    @Autowired
+    private WebApplicationContext context;
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
     @Test
@@ -57,7 +66,7 @@ class PurchaseTransactionControllerTest {
 
         when(purchaseTransactionService.createPurchaseTransaction(any(PurchaseTransaction.class))).thenReturn(transaction);
 
-        mockMvc.perform(post("/api/v1/purchasetransaction")
+        mockMvc.perform(post(CREATE_PURCHASE_TRANSACTION_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(transaction)))
                 .andExpect(status().isOk())
@@ -72,15 +81,46 @@ class PurchaseTransactionControllerTest {
                 .transactionDate(LocalDate.now())
                 .amount(new BigDecimal("12.34")).build();
 
-        when(purchaseTransactionService.createPurchaseTransaction(any(PurchaseTransaction.class))).thenReturn(transaction);
-
-        mockMvc.perform(post("/api/v1/purchasetransaction")
+        mockMvc.perform(post(CREATE_PURCHASE_TRANSACTION_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(transaction)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value("test"))
-                .andExpect(jsonPath("$.amount").value("12.34"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_MESSAGE_JSON_PATH)
+                        .value("Validation errors found: [Description must not exceed 50 characters.]"));
     }
+
+    @Test
+    void createPurchaseTransaction_invalidTransactionDate() throws Exception {
+        String input = "{\n" +
+                "    \"description\": \"test\",\n" +
+                "    \"transactionDate\": \"20220\",\n" +
+                "    \"amount\": \"1.205\"\n" +
+                "}";
+
+        mockMvc.perform(post(CREATE_PURCHASE_TRANSACTION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(input))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_MESSAGE_JSON_PATH)
+                        .value("Invalid input format. Please check if the date and number formats are correct."));
+    }
+
+    @Test
+    void createPurchaseTransaction_invalidAmount() throws Exception {
+        String input = "{\n" +
+                "    \"description\": \"test\",\n" +
+                "    \"transactionDate\": \"2022-02-20\",\n" +
+                "    \"amount\": \"notanumber\"\n" +
+                "}";
+
+        mockMvc.perform(post(CREATE_PURCHASE_TRANSACTION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(input))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(ERROR_MESSAGE_JSON_PATH)
+                        .value("Invalid input format. Please check if the date and number formats are correct."));
+    }
+
 
     @Test
     void getPurchaseTransactionById() throws Exception {
@@ -90,7 +130,7 @@ class PurchaseTransactionControllerTest {
                 .transactionDate(LocalDate.now())
                 .amount(new BigDecimal("12.34")).build();
 
-        when(purchaseTransactionService.getPurchaseTransactionById(any(Long.class))).thenReturn(transaction);
+        when(purchaseTransactionService.getPurchaseTransactionById(any(Long.class))).thenReturn(Optional.of(transaction));
 
         mockMvc.perform(get("/api/v1/purchasetransaction/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +156,7 @@ class PurchaseTransactionControllerTest {
                 .exchangeRate(BigDecimal.valueOf(2))
                 .build();
 
-        when(purchaseTransactionService.getPurchaseTransactionById(any(Long.class))).thenReturn(transaction);
+        when(purchaseTransactionService.getPurchaseTransactionById(any(Long.class))).thenReturn(Optional.of(transaction));
         when(currencyConversionService.convertFromUSD(any(PurchaseTransaction.class), anyString())).thenReturn(result);
 
         String test = mockMvc.perform(get("/api/v1/purchasetransaction/1111/convertCurrency?country=Australia"))

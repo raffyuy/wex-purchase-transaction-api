@@ -5,8 +5,7 @@ plugins {
 }
 
 group = 'com.wex'
-version = null
-//sourceCompatibility = '17'
+version = '1.0.0'
 
 configurations {
 	compileOnly {

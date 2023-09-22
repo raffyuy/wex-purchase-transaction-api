@@ -5,7 +5,6 @@ import com.wex.purchasetransaction.repository.PurchaseTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
 
@@ -20,9 +19,9 @@ public class PurchaseTransactionService {
         return repository.save(transaction);
     }
 
-    public PurchaseTransaction getPurchaseTransactionById(Long id) {
+    public Optional<PurchaseTransaction> getPurchaseTransactionById(Long id) {
         Optional<PurchaseTransaction> result = repository.findById(id);
-        return result.orElse(null);
+        return result;
     }
 
 }
