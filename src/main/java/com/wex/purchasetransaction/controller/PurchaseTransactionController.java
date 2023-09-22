@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:8081")
@@ -44,7 +45,7 @@ public class PurchaseTransactionController {
     @GetMapping("/v1/purchasetransaction/{id}/convertCurrency")
     public ResponseEntity<PurchaseTransaction> getPurchaseTransactionInCurrency(
             @PathVariable Long id,
-            @RequestParam(required = false) String country) throws JsonProcessingException, ExchangeRateNotFoundException, PurchaseTransactionNotFoundException {
+            @RequestParam(required = false) String country) throws JsonProcessingException, ExchangeRateNotFoundException, PurchaseTransactionNotFoundException, UnsupportedEncodingException {
         Optional<PurchaseTransaction> transaction = purchaseTransactionService.getPurchaseTransactionById(id);
         if (transaction.isPresent()) {
             PurchaseTransaction result = currencyConversionService.convertFromUSD(transaction.get(), country);
