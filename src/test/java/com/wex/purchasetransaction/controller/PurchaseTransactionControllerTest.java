@@ -126,21 +126,6 @@ class PurchaseTransactionControllerTest {
                         .value("Invalid input format. Please check if the date and number formats are correct."));
     }
 
-    @Autowired
-    RestTemplate restTemplate;
-    @Test
-    void test() throws JsonProcessingException {
-        String uri = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/rates_of_exchange?" +
-                "fields=effective_date,country,exchange_rate" +
-                "&filter=country:eq:{country},effective_date:lte:2020-03-22,effective_date:gt:2019-09-22&page[size]=1&sort=-effective_date";
-
-        URI expanded = new UriTemplate(uri).expand("Antigua & Barbuda");
-        ExchangeRateResponse forObject = restTemplate.getForObject(expanded, ExchangeRateResponse.class);
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new JavaTimeModule());
-        System.out.println(om.writeValueAsString(forObject));
-    }
-
     @Test
     void getPurchaseTransactionById() throws Exception {
         PurchaseTransaction transaction = PurchaseTransaction.builder()
