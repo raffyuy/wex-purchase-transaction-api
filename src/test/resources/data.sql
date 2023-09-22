@@ -1,0 +1,1 @@
+insert into purchase_transaction (id, description, transaction_date, amount) values (22, 'test', '2020-03-22', 20.2);
