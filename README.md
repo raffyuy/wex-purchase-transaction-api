@@ -7,6 +7,25 @@ This is the WEX TAG and Gateway coding assignment submission by Rafael Uy
 ###Assumptions
 1. All purchase transactions stored is in USD
 2. I am free to create the endpoint specifications (ie. naming, parameters, etc)
+
+###Future improvements
+Unfortunately I have to limit the time I spend on this as I have other applications to tend to. If I had more time,
+I would work on the following:
+
+1. Security
+2. API Documentation, maybe through swagger
+3. Additional tests, especially negative scenarios
+
+###Thanks
+To the people reviewing my code,
+
+
+Thank you for taking time to review my work. It's been an interesting challenge
+and I enjoyed working on it, despite my busy schedule. I am looking forward to 
+hearing back and I am keen to receive constructive feedback on my work.  
+
+
+
 ----
 ##Quickstart 
 ###Build
@@ -86,3 +105,6 @@ Response:
     "exchangeRate": 1.425
 }
 ```
+
+
+
